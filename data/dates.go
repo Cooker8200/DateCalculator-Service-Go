@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
+// TODO: why won't these import to the routes file
 func GetAllDates(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, "my first api")
 }
