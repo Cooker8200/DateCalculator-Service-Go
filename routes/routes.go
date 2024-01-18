@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type TableBasics struct {
@@ -27,9 +28,20 @@ func InitRouter() {
 
 // data functions - to be moved to separate file when I figure it out
 func GetAllDates(c *gin.Context) {
+	var envs map[string]string
+	envs, err := godotenv.Read(".env")
+
+	if err != nil {
+			log.Fatal("Error loading .env file")
+	}
+
+	aws_access_key_id := envs["aws_access_key_id"]
+	aws_secret_access_key := envs["aws_secret_access_key"]
+
 	// os.Setenv("AWS_PROFILE", "go")
 	// cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile("go"))
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("", "", "")))
+	// DO NOT COMMIT HARD CODED VALUES
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(aws_access_key_id, aws_secret_access_key, "")))
 	if err != nil {
 		log.Fatalf("Unable to load SDK config: %v\n", err)
 	}
