@@ -18,6 +18,12 @@ type TableBasics struct {
 	TableName string
 }
 
+type Date struct {
+	dateName string
+	dateType string
+	date string
+}
+
 func InitRouter() {
 	router := gin.Default()
 
@@ -26,41 +32,55 @@ func InitRouter() {
 	router.Run("localhost:3001")
 }
 
-// data functions - to be moved to separate file when I figure it out
-func GetAllDates(c *gin.Context) {
-	var envs map[string]string
+func configureAWS() (*dynamodb.Client) {
 	envs, err := godotenv.Read(".env")
 
 	if err != nil {
 			log.Fatal("Error loading .env file")
 	}
 
-	aws_access_key_id := envs["aws_access_key_id"]
-	aws_secret_access_key := envs["aws_secret_access_key"]
-
-	// os.Setenv("AWS_PROFILE", "go")
-	// cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile("go"))
-	// DO NOT COMMIT HARD CODED VALUES
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(aws_access_key_id, aws_secret_access_key, "")))
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(envs["aws_access_key_id"], envs["aws_secret_access_key"], "")))
 	if err != nil {
-		log.Fatalf("Unable to load SDK config: %v\n", err)
+		log.Fatalln("Unable to load SDK config: ", err)
 	}
 
 	svc := dynamodb.NewFromConfig(cfg)
+	return svc
+}
+
+func GetAllDates(c *gin.Context) {
+	svc := configureAWS()
 
 	resp, err := svc.Scan(context.TODO(), &dynamodb.ScanInput{
 		TableName: aws.String("dates"),
 	})
 	if err != nil {
-		log.Printf("Failed to scan: %v\n", err)
+		log.Println("Failed to scan: ", err)
+		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong.")
 	} else {
-		log.Printf("results %v\n", resp)
 		c.IndentedJSON(http.StatusOK, resp.Items)
 	}
 }
 
 func AddNewDate(c *gin.Context) {
+	// newDate := c.Request.Body
+	var newDate Date
+	newDate.dateName = "newDate"
+	newDate.dateType = "dateType"
+	newDate.date = "Jan 1 2020"
 
+	svc := configureAWS()
+
+	resp, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String("dates"),
+		// Item: map[string]string{"name":"test", "type":"test","date":"test"},
+	})
+	if err != nil {
+		log.Println("Failed to add new date: ", err)
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date.")
+	} else {
+		c.IndentedJSON(http.StatusOK, resp.ResultMetadata)
+	}
 }
 
 func RemoveDate(c *gin.Context) {
