@@ -84,5 +84,19 @@ func AddNewDate(c *gin.Context) {
 }
 
 func RemoveDate(c *gin.Context) {
+	// key := c.Request
+	// var key = "keyToRemove"
 
+	svc := configureAWS()
+
+	_, err := svc.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String("dates"),
+		// Key: key,
+	})
+	if err != nil {
+		log.Println("Failed to delete item: ", err)
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to remove date")
+	} else {
+		c.IndentedJSON(http.StatusOK, "Date removed")
+	}
 }
