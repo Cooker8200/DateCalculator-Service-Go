@@ -28,6 +28,8 @@ func InitRouter() {
 	router := gin.Default()
 
 	router.GET("/dates", GetAllDates)
+	router.PUT("/dates", AddNewDate)
+	router.DELETE("/dates", RemoveDate)
 
 	router.Run("localhost:3001")
 }
@@ -64,16 +66,18 @@ func GetAllDates(c *gin.Context) {
 
 func AddNewDate(c *gin.Context) {
 	// newDate := c.Request.Body
+	log.Println("request body: ", c.Request)
 	var newDate Date
-	newDate.dateName = "newDate"
-	newDate.dateType = "dateType"
-	newDate.date = "Jan 1 2020"
+	newDate.dateName = "test"
+	newDate.dateType = "test"
+	newDate.date = "test"
 
 	svc := configureAWS()
 
 	resp, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
 		// Item: map[string]string{"name":"test", "type":"test","date":"test"},
+		// Item: make(map[newDate][]newDate),
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
