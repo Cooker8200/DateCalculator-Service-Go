@@ -74,7 +74,7 @@ func AddNewDate(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
 	}
 
-	resp, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
 		Item: map[string]types.AttributeValue{
 			"name": &types.AttributeValueMemberS{Value: dateToAdd.DateName},
