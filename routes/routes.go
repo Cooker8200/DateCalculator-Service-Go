@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -66,18 +67,22 @@ func GetAllDates(c *gin.Context) {
 
 func AddNewDate(c *gin.Context) {
 	// newDate := c.Request.Body
-	log.Println("request body: ", c.Request)
+	log.Println("request body: ", c)
 	var newDate Date
-	newDate.dateName = "test"
-	newDate.dateType = "test"
-	newDate.date = "test"
-
+	
 	svc := configureAWS()
 
+	if err := c.BindJSON(&newDate); err != nil {
+		return
+	}
+	log.Print("new date: ", newDate)
 	resp, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
-		// Item: map[string]string{"name":"test", "type":"test","date":"test"},
-		// Item: make(map[newDate][]newDate),
+		Item: map[string]types.AttributeValue{
+			"name": &types.AttributeValueMemberS{Value: "test"},
+			"type": &types.AttributeValueMemberS{Value: "test"},
+			"date": &types.AttributeValueMemberS{Value: "test"},
+		},
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
@@ -95,7 +100,9 @@ func RemoveDate(c *gin.Context) {
 
 	_, err := svc.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String("dates"),
-		// Key: key,
+		Key: map[string]types.AttributeValue{
+			"name": &types.AttributeValueMemberS{Value: "test"},
+		},
 	})
 	if err != nil {
 		log.Println("Failed to delete item: ", err)
