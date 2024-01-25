@@ -20,9 +20,9 @@ type TableBasics struct {
 }
 
 type Date struct {
-	dateName string
-	dateType string
-	date string
+	DateName string `json:"name" binding:"required"`
+	DateType string `json:"type" binding:"required"`
+	Date string `json:"date" binding:"required"`
 }
 
 func InitRouter() {
@@ -66,42 +66,43 @@ func GetAllDates(c *gin.Context) {
 }
 
 func AddNewDate(c *gin.Context) {
-	// newDate := c.Request.Body
-	log.Println("request body: ", c)
-	var newDate Date
-	
 	svc := configureAWS()
-
-	if err := c.BindJSON(&newDate); err != nil {
-		return
+	
+	var dateToAdd Date
+	
+	if err := c.ShouldBindJSON(&dateToAdd); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
 	}
-	log.Print("new date: ", newDate)
+
 	resp, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
 		Item: map[string]types.AttributeValue{
-			"name": &types.AttributeValueMemberS{Value: "test"},
-			"type": &types.AttributeValueMemberS{Value: "test"},
-			"date": &types.AttributeValueMemberS{Value: "test"},
+			"name": &types.AttributeValueMemberS{Value: dateToAdd.DateName},
+			"type": &types.AttributeValueMemberS{Value: dateToAdd.DateType},
+			"date": &types.AttributeValueMemberS{Value: dateToAdd.Date},
 		},
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date.")
 	} else {
-		c.IndentedJSON(http.StatusOK, resp.ResultMetadata)
+		c.IndentedJSON(http.StatusOK, "Date added")
 	}
 }
 
 func RemoveDate(c *gin.Context) {
-	// key := c.Request
-	// var key = "keyToRemove"
-
 	svc := configureAWS()
+
+	var dateToRemove Date
+
+	if err := c.ShouldBindJSON(&dateToRemove); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+	}
 
 	_, err := svc.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String("dates"),
 		Key: map[string]types.AttributeValue{
-			"name": &types.AttributeValueMemberS{Value: "test"},
+			"name": &types.AttributeValueMemberS{Value: dateToRemove.DateName},
 		},
 	})
 	if err != nil {
