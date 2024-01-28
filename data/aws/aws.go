@@ -1,4 +1,4 @@
-package dates
+package aws
 
 import (
 	"context"
