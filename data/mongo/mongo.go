@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -31,26 +32,22 @@ func configureMongo() *mongo.Client{
 	mongoClient = client
 
 	return mongoClient
-	// clientOptions := options.Client().ApplyURI(envs["mongo_url"])
-	// client, err := mongo.Connect(context.TODO(), clientOptions)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// err = client.Ping(context.TODO(), nil)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }
 
 func GetAllDates(c *gin.Context) {
 	svc := configureMongo()
-log.Print("made it here")
-	dates := svc.Database("dates")
 
-	log.Print(dates)
-	
-	c.IndentedJSON(http.StatusOK, "did something, but still working on it")
+	dates, err := svc.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		log.Fatal("Failed to find all dates")		
+	}
+
+	var parsedDates []bson.M
+	if err = dates.All(context.TODO(), &parsedDates); err != nil {
+		log.Fatal("Error parsing results")
+	}
+
+	c.IndentedJSON(http.StatusOK, parsedDates)
 }
 
 func AddNewDate() {
