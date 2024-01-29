@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func configureMongo() *mongo.Client{
+func configureMongo() *mongo.Client {
 	var mongoClient *mongo.Client
 
 	envs, err := godotenv.Read(".env")
@@ -25,10 +25,13 @@ func configureMongo() *mongo.Client{
 
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
-		log.Fatal(err)
+		log.Print("Could not connect to mongo.", err)
 	}
 
 	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Print("Could not ping mongo.", err)
+	}
 	mongoClient = client
 
 	return mongoClient
@@ -39,12 +42,14 @@ func GetAllDates(c *gin.Context) {
 
 	dates, err := svc.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {
-		log.Fatal("Failed to find all dates")		
+		log.Print("Failed to find all dates")
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to find all dates. Mongo may not be running")
 	}
 
 	var parsedDates []bson.M
 	if err = dates.All(context.TODO(), &parsedDates); err != nil {
-		log.Fatal("Error parsing results")
+		log.Print("Error parsing results")
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to parse found dates")
 	}
 
 	c.IndentedJSON(http.StatusOK, parsedDates)
