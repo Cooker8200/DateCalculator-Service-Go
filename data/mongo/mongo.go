@@ -12,6 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Date struct {
+	Name string `json:"name" binding:"required"`
+	Type string `json:"type" binding:"required"`
+	Date string `json:"date" binding:"required"`
+}
+
 func configureMongo() *mongo.Client {
 	var mongoClient *mongo.Client
 
@@ -38,9 +44,9 @@ func configureMongo() *mongo.Client {
 }
 
 func GetAllDates(c *gin.Context) {
-	svc := configureMongo()
+	mongo := configureMongo()
 
-	dates, err := svc.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
+	dates, err := mongo.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		log.Print("Failed to find all dates")
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to find all dates. Mongo may not be running")
@@ -55,15 +61,41 @@ func GetAllDates(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, parsedDates)
 }
 
-func AddNewDate() {
+func AddNewDate(c *gin.Context) {
+	mongo := configureMongo()
 
+	var newDate Date
+
+	if err := (c.ShouldBindJSON(&newDate)); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+	}
+
+	result, err := mongo.Database("dateCalculator").Collection("dates").InsertOne(context.TODO(), newDate)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date")
+	}
+
+	c.IndentedJSON(http.StatusOK, result)
 }
 
-func RemoveDate() {
+func RemoveDate(c *gin.Context) {
+	mongo := configureMongo()
 
+	var dateToRemove Date
+
+	if err := (c.ShouldBindJSON(&dateToRemove)); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+	}
+
+	result, err := mongo.Database("dateCalculator").Collection("dates").DeleteOne(context.TODO(), bson.D{{Key: "name", Value: dateToRemove.Name}})
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to add remove date")
+	}
+
+	c.IndentedJSON(http.StatusOK, result)
 }
 
-func PopulateDatabase() {
+func CreateDatabase() {
 
 }
 

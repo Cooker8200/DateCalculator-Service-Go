@@ -15,8 +15,8 @@ func InitRouter() {
 	router.DELETE("/dates/aws", aws.RemoveDate)
 
 	router.GET("/dates/mongo", mongo.GetAllDates)
-	router.PUT("/dates/mongo")
-	router.DELETE("/dates/mongo")
+	router.PUT("/dates/mongo", mongo.AddNewDate)
+	router.DELETE("/dates/mongo", mongo.RemoveDate)
 
 	router.POST("/dates/monogo/populate")
 	router.DELETE("/dates/mongo/wipe")

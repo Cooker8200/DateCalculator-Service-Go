@@ -20,8 +20,8 @@ type TableBasics struct {
 }
 
 type Date struct {
-	DateName string `json:"name" binding:"required"`
-	DateType string `json:"type" binding:"required"`
+	Name string `json:"name" binding:"required"`
+	Type string `json:"type" binding:"required"`
 	Date string `json:"date" binding:"required"`
 }
 
@@ -67,14 +67,14 @@ func AddNewDate(c *gin.Context) {
 	_, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
 		Item: map[string]types.AttributeValue{
-			"name": &types.AttributeValueMemberS{Value: dateToAdd.DateName},
-			"type": &types.AttributeValueMemberS{Value: dateToAdd.DateType},
+			"name": &types.AttributeValueMemberS{Value: dateToAdd.Name},
+			"type": &types.AttributeValueMemberS{Value: dateToAdd.Type},
 			"date": &types.AttributeValueMemberS{Value: dateToAdd.Date},
 		},
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date.")
+		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date")
 	} else {
 		c.IndentedJSON(http.StatusOK, "Date added")
 	}
@@ -92,7 +92,7 @@ func RemoveDate(c *gin.Context) {
 	_, err := svc.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String("dates"),
 		Key: map[string]types.AttributeValue{
-			"name": &types.AttributeValueMemberS{Value: dateToRemove.DateName},
+			"name": &types.AttributeValueMemberS{Value: dateToRemove.Name},
 		},
 	})
 	if err != nil {
