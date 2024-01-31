@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -37,26 +38,32 @@ func configureAWS() (*dynamodb.Client) {
 		log.Fatalln("Unable to load SDK config: ", err)
 	}
 
-	svc := dynamodb.NewFromConfig(cfg)
-	return svc
+	dynamo := dynamodb.NewFromConfig(cfg)
+	return dynamo
 }
 
 func GetAllDates(c *gin.Context) {
-	svc := configureAWS()
+	dynamo := configureAWS()
 
-	resp, err := svc.Scan(context.TODO(), &dynamodb.ScanInput{
+	resp, err := dynamo.Scan(context.TODO(), &dynamodb.ScanInput{
 		TableName: aws.String("dates"),
 	})
 	if err != nil {
 		log.Println("Failed to scan: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong.")
-	} else {
-		c.IndentedJSON(http.StatusOK, resp.Items)
+		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong")
 	}
+
+	var dates []Date
+	err = attributevalue.UnmarshalListOfMaps(resp.Items, &dates)
+	if err != nil {
+		log.Print("Failed to do unmarshal data")
+	}
+
+	c.IndentedJSON(http.StatusOK, dates)
 }
 
 func AddNewDate(c *gin.Context) {
-	svc := configureAWS()
+	dynamo := configureAWS()
 	
 	var dateToAdd Date
 	
@@ -64,7 +71,7 @@ func AddNewDate(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
 	}
 
-	_, err := svc.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err := dynamo.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("dates"),
 		Item: map[string]types.AttributeValue{
 			"name": &types.AttributeValueMemberS{Value: dateToAdd.Name},
@@ -75,13 +82,13 @@ func AddNewDate(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date")
-	} else {
-		c.IndentedJSON(http.StatusOK, "Date added")
 	}
+
+	c.IndentedJSON(http.StatusOK, "Date added")
 }
 
 func RemoveDate(c *gin.Context) {
-	svc := configureAWS()
+	dynamo := configureAWS()
 
 	var dateToRemove Date
 
@@ -89,7 +96,7 @@ func RemoveDate(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
 	}
 
-	_, err := svc.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+	_, err := dynamo.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String("dates"),
 		Key: map[string]types.AttributeValue{
 			"name": &types.AttributeValueMemberS{Value: dateToRemove.Name},
@@ -98,7 +105,7 @@ func RemoveDate(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to delete item: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, "Failed to remove date")
-	} else {
-		c.IndentedJSON(http.StatusOK, "Date removed")
 	}
+
+	c.IndentedJSON(http.StatusOK, "Date removed")
 }
