@@ -95,10 +95,16 @@ func RemoveDate(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, result)
 }
 
-func CreateDatabase() {
+func WipeDatabase(c *gin.Context) {
+	mongo := configureMongo()
 
-}
+	if err := mongo.Database("dateCalculator").Drop(context.TODO()); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Did not drop the db")
+	}
 
-func WipeDatabase() {
+	if err := mongo.Database("dateCalculator").CreateCollection(context.TODO(), "dates"); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, "Error creating fresh database")
+	}
 
+	c.IndentedJSON(http.StatusOK, "Fresh database ready to go!")
 }

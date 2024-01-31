@@ -17,9 +17,7 @@ func InitRouter() {
 	router.GET("/dates/mongo", mongo.GetAllDates)
 	router.PUT("/dates/mongo", mongo.AddNewDate)
 	router.DELETE("/dates/mongo", mongo.RemoveDate)
-
-	router.POST("/dates/monogo/populate")
-	router.DELETE("/dates/mongo/wipe")
+	router.DELETE("/dates/mongo/wipe", mongo.WipeDatabase)
 
 	router.Run("localhost:3001")
 }
