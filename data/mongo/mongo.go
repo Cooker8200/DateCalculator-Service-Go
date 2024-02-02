@@ -49,16 +49,16 @@ func GetAllDates(c *gin.Context) {
 	dates, err := mongo.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		log.Print("Failed to find all dates")
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to find all dates. Mongo may not be running")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to find all dates. Mongo may not be running"})
 	}
 
 	var parsedDates []bson.M
 	if err = dates.All(context.TODO(), &parsedDates); err != nil {
 		log.Print("Error parsing results")
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to parse found dates")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to parse found dates"})
 	}
 
-	c.IndentedJSON(http.StatusOK, parsedDates)
+	c.IndentedJSON(http.StatusOK, gin.H{"body": parsedDates})
 }
 
 func AddNewDate(c *gin.Context) {
@@ -72,10 +72,10 @@ func AddNewDate(c *gin.Context) {
 
 	result, err := mongo.Database("dateCalculator").Collection("dates").InsertOne(context.TODO(), newDate)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add new date"})
 	}
 
-	c.IndentedJSON(http.StatusOK, result)
+	c.IndentedJSON(http.StatusOK, gin.H{"body": result})
 }
 
 func RemoveDate(c *gin.Context) {
@@ -84,27 +84,27 @@ func RemoveDate(c *gin.Context) {
 	var dateToRemove Date
 
 	if err := (c.ShouldBindJSON(&dateToRemove)); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
 	}
 
 	result, err := mongo.Database("dateCalculator").Collection("dates").DeleteOne(context.TODO(), bson.D{{Key: "name", Value: dateToRemove.Name}})
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to add remove date")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add remove date"})
 	}
 
-	c.IndentedJSON(http.StatusOK, result)
+	c.IndentedJSON(http.StatusOK, gin.H{"body": result})
 }
 
 func WipeDatabase(c *gin.Context) {
 	mongo := configureMongo()
 
 	if err := mongo.Database("dateCalculator").Drop(context.TODO()); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Did not drop the db")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Did not drop the db"})
 	}
 
 	if err := mongo.Database("dateCalculator").CreateCollection(context.TODO(), "dates"); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Error creating fresh database")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Error creating fresh database"})
 	}
 
-	c.IndentedJSON(http.StatusOK, "Fresh database ready to go!")
+	c.IndentedJSON(http.StatusOK, gin.H{"body": "Fresh database ready to go!"})
 }

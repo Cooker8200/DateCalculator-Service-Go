@@ -50,7 +50,7 @@ func GetAllDates(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println("Failed to scan: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, "Something went wrong")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Something went wrong"})
 	}
 
 	var dates []Date
@@ -59,7 +59,7 @@ func GetAllDates(c *gin.Context) {
 		log.Print("Failed to do unmarshal data")
 	}
 
-	c.IndentedJSON(http.StatusOK, dates)
+	c.IndentedJSON(http.StatusOK, gin.H{"body": dates})
 }
 
 func AddNewDate(c *gin.Context) {
@@ -68,7 +68,7 @@ func AddNewDate(c *gin.Context) {
 	var dateToAdd Date
 	
 	if err := c.ShouldBindJSON(&dateToAdd); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
 	}
 
 	_, err := dynamo.PutItem(context.TODO(), &dynamodb.PutItemInput{
@@ -81,10 +81,10 @@ func AddNewDate(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to add new date")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add new date"})
 	}
 
-	c.IndentedJSON(http.StatusOK, "Date added")
+	c.IndentedJSON(http.StatusOK, gin.H{"body": "Date added"})
 }
 
 func RemoveDate(c *gin.Context) {
@@ -93,7 +93,7 @@ func RemoveDate(c *gin.Context) {
 	var dateToRemove Date
 
 	if err := c.ShouldBindJSON(&dateToRemove); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to bind request body")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
 	}
 
 	_, err := dynamo.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
@@ -104,8 +104,8 @@ func RemoveDate(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println("Failed to delete item: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, "Failed to remove date")
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to remove date"})
 	}
 
-	c.IndentedJSON(http.StatusOK, "Date removed")
+	c.IndentedJSON(http.StatusOK, gin.H{"body": "Date removed"})
 }
