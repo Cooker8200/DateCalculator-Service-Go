@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -61,6 +62,19 @@ func GetAllDates(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"body": parsedDates})
 }
 
+func getSpecificDate(mongoClient *mongo.Client, id interface{}) []primitive.M {
+	date, err := mongoClient.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.M{"_id": id})
+	if err != nil {
+		log.Print("Failed to find dates: ", id)
+	}
+var parsedDate []bson.M
+if err = date.All(context.TODO(), &parsedDate); err != nil {
+	log.Print("Error parsing result")
+}
+
+return parsedDate
+}
+
 func AddNewDate(c *gin.Context) {
 	mongo := configureMongo()
 
@@ -75,7 +89,9 @@ func AddNewDate(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add new date"})
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"body": result})
+	insertedDate := getSpecificDate(mongo, result.InsertedID)
+
+	c.IndentedJSON(http.StatusOK, gin.H{"body": insertedDate})
 }
 
 func RemoveDate(c *gin.Context) {
