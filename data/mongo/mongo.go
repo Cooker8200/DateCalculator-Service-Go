@@ -19,12 +19,17 @@ type Date struct {
 	Date string `json:"date" binding:"required"`
 }
 
+
+func TestFunc(a int, b int) int {
+	return a + b
+}
+
 func configureMongo() *mongo.Client {
 	var mongoClient *mongo.Client
 
 	envs, err := godotenv.Read(".env")
 	if err != nil {
-			log.Fatal("Error loading .env file")
+			log.Fatal("Error loading .env file", err)
 	}
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
@@ -67,12 +72,13 @@ func getSpecificDate(mongoClient *mongo.Client, id interface{}) []primitive.M {
 	if err != nil {
 		log.Print("Failed to find dates: ", id)
 	}
-var parsedDate []bson.M
-if err = date.All(context.TODO(), &parsedDate); err != nil {
-	log.Print("Error parsing result")
-}
 
-return parsedDate
+	var parsedDate []bson.M
+	if err = date.All(context.TODO(), &parsedDate); err != nil {
+		log.Print("Error parsing result")
+	}
+
+	return parsedDate
 }
 
 func AddNewDate(c *gin.Context) {
