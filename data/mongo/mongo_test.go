@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
 func TestTestFunc(t *testing.T) {
@@ -25,10 +24,6 @@ func TestTestFunc(t *testing.T) {
  }
  
  func TestGetAllDates(t *testing.T) {
-	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	// mt.Coll = {{"name": "test", "date": "test", "type": "test"}}
-
-	mt.Run("getAllDates", func(mt *mtest.T) {
 		recorder, c := setupHttpTests()
 	
 		// expectedBody := []primitive.M{"name": "Matt","date": "June 18","type": "Birthday"}
@@ -40,7 +35,6 @@ func TestTestFunc(t *testing.T) {
 		if response.StatusCode != 200 {
 			t.Error(recorder.Code, "Failed test")
 		}
-	})
  }
 
  func TestAddNewDate(t *testing.T) {

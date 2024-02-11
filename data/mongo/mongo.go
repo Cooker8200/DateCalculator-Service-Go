@@ -6,11 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Date struct {
@@ -24,34 +22,7 @@ func TestFunc(a int, b int) int {
 	return a + b
 }
 
-func configureMongo() *mongo.Client {
-	var mongoClient *mongo.Client
-
-	envs, err := godotenv.Read(".env")
-	if err != nil {
-			log.Fatal("Error loading .env file", err)
-	}
-
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(envs["mongo_url"]).SetServerAPIOptions(serverAPI)
-
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		log.Print("Could not connect to mongo.", err)
-	}
-
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Print("Could not ping mongo.", err)
-	}
-	mongoClient = client
-
-	return mongoClient
-}
-
-func GetAllDates(c *gin.Context) {
-	mongo := configureMongo()
-
+func GetAllDates(c *gin.Context, mongo *mongo.Client) {
 	dates, err := mongo.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		log.Print("Failed to find all dates")
@@ -81,9 +52,7 @@ func getSpecificDate(mongoClient *mongo.Client, id interface{}) []primitive.M {
 	return parsedDate
 }
 
-func AddNewDate(c *gin.Context) {
-	mongo := configureMongo()
-
+func AddNewDate(c *gin.Context, mongo *mongo.Client) {
 	var newDate Date
 
 	if err := (c.ShouldBindJSON(&newDate)); err != nil {
@@ -100,9 +69,7 @@ func AddNewDate(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"body": insertedDate})
 }
 
-func RemoveDate(c *gin.Context) {
-	mongo := configureMongo()
-
+func RemoveDate(c *gin.Context, mongo *mongo.Client) {
 	var dateToRemove Date
 
 	if err := (c.ShouldBindJSON(&dateToRemove)); err != nil {
@@ -117,9 +84,7 @@ func RemoveDate(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"body": result})
 }
 
-func WipeDatabase(c *gin.Context) {
-	mongo := configureMongo()
-
+func WipeDatabase(c *gin.Context, mongo *mongo.Client) {
 	if err := mongo.Database("dateCalculator").Drop(context.TODO()); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Did not drop the db"})
 	}
