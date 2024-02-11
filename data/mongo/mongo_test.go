@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
 func TestTestFunc(t *testing.T) {
@@ -23,20 +24,23 @@ func TestTestFunc(t *testing.T) {
 	return recorder, c
  }
  
- // TODO: godotenv mocking, mongo mocking
-
  func TestGetAllDates(t *testing.T) {
-	recorder, c := setupHttpTests()
+	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+	// mt.Coll = {{"name": "test", "date": "test", "type": "test"}}
 
-	// expectedBody := []primitive.M{"name": "Matt","date": "June 18","type": "Birthday"}
-
-	GetAllDates(c)
-
-	response := recorder.Result()
-
-	if response.StatusCode != 200 {
-		t.Error(recorder.Code, "Failed test")
-	}
+	mt.Run("getAllDates", func(mt *mtest.T) {
+		recorder, c := setupHttpTests()
+	
+		// expectedBody := []primitive.M{"name": "Matt","date": "June 18","type": "Birthday"}
+	
+		GetAllDates(c)
+	
+		response := recorder.Result()
+	
+		if response.StatusCode != 200 {
+			t.Error(recorder.Code, "Failed test")
+		}
+	})
  }
 
  func TestAddNewDate(t *testing.T) {
