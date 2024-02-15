@@ -18,10 +18,6 @@ type Date struct {
 }
 
 
-func TestFunc(a int, b int) int {
-	return a + b
-}
-
 func GetAllDates(c *gin.Context, mongo *mongo.Client) {
 	dates, err := mongo.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {

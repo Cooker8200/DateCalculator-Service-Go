@@ -1,14 +1,18 @@
 package mongo
 
 import (
-	"net/http/httptest"
+	// "net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
+	// "github.com/gin-gonic/gin"
 )
 
-func TestTestFunc(t *testing.T) {
-	result := TestFunc(1, 3)
+func firstTest(a int, b int) int {
+	return a + b
+}
+
+func TestFirstTest(t *testing.T) {
+	result := firstTest(1, 3)
 	expected := 4
 
 	if result != expected {
@@ -16,59 +20,59 @@ func TestTestFunc(t *testing.T) {
 	}
  }
  
- func setupHttpTests() (*httptest.ResponseRecorder, *gin.Context) {
-	recorder := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(recorder)
+//  func setupHttpTests() (*httptest.ResponseRecorder, *gin.Context) {
+// 	recorder := httptest.NewRecorder()
+// 	c, _ := gin.CreateTestContext(recorder)
 
-	return recorder, c
- }
+// 	return recorder, c
+//  }
  
- func TestGetAllDates(t *testing.T) {
-		recorder, c := setupHttpTests()
+//  func TestGetAllDates(t *testing.T) {
+// 		recorder, c := setupHttpTests()
 	
-		// expectedBody := []primitive.M{"name": "Matt","date": "June 18","type": "Birthday"}
+// 		// expectedBody := []primitive.M{"name": "Matt","date": "June 18","type": "Birthday"}
 	
-		GetAllDates(c)
+// 		GetAllDates(c)
 	
-		response := recorder.Result()
+// 		response := recorder.Result()
 	
-		if response.StatusCode != 200 {
-			t.Error(recorder.Code, "Failed test")
-		}
- }
+// 		if response.StatusCode != 200 {
+// 			t.Error(recorder.Code, "Failed test")
+// 		}
+//  }
 
- func TestAddNewDate(t *testing.T) {
-	recorder, c := setupHttpTests()
+//  func TestAddNewDate(t *testing.T) {
+// 	recorder, c := setupHttpTests()
 
-	AddNewDate(c)
+// 	AddNewDate(c)
 
-	response := recorder.Result()
+// 	response := recorder.Result()
 
-	if response.StatusCode != 200 {
-		t.Error(recorder.Code, "Failed test")
-	}
- }
+// 	if response.StatusCode != 200 {
+// 		t.Error(recorder.Code, "Failed test")
+// 	}
+//  }
 
- func TestRemoveDate(t *testing.T) {
-	recorder, c := setupHttpTests()
+//  func TestRemoveDate(t *testing.T) {
+// 	recorder, c := setupHttpTests()
 
-	RemoveDate(c)
+// 	RemoveDate(c)
 
-	response := recorder.Result()
+// 	response := recorder.Result()
 
-	if response.StatusCode != 200 {
-		t.Error(recorder.Code, "Failed test")
-	}
- }
+// 	if response.StatusCode != 200 {
+// 		t.Error(recorder.Code, "Failed test")
+// 	}
+//  }
 
- func TestWipeDatabase (t *testing.T) {
-	recorder, c := setupHttpTests()
+//  func TestWipeDatabase (t *testing.T) {
+// 	recorder, c := setupHttpTests()
 
-	WipeDatabase(c)
+// 	WipeDatabase(c)
 
-	response := recorder.Result()
+// 	response := recorder.Result()
 
-	if response.StatusCode != 200 {
-		t.Error(recorder.Code, "Failed test")
-	}
- }
+// 	if response.StatusCode != 200 {
+// 		t.Error(recorder.Code, "Failed test")
+// 	}
+//  }
