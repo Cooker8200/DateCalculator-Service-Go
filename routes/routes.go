@@ -75,5 +75,5 @@ func InitRouter() {
 		mon.WipeDatabase(c, mongoClient)
 	})
 
-	router.Run("localhost:3001")
+	router.Run("0.0.0.0:3001")
 }
