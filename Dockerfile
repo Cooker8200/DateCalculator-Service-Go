@@ -1,5 +1,7 @@
 FROM golang:1.21
 
+# TODO: pass aws creds as params
+
 WORKDIR /app
 
 COPY . .
