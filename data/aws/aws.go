@@ -44,19 +44,21 @@ func configureAWS() (*dynamodb.Client) {
 
 func GetAllDates(c *gin.Context) {
 	dynamo := configureAWS()
-
+	log.Print("GETTING DATA")
 	resp, err := dynamo.Scan(context.TODO(), &dynamodb.ScanInput{
 		TableName: aws.String("dates"),
 	})
 	if err != nil {
 		log.Println("Failed to scan: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Something went wrong"})
+		return
 	}
-
+	log.Print("UNMARSHALLING")
 	var dates []Date
 	err = attributevalue.UnmarshalListOfMaps(resp.Items, &dates)
 	if err != nil {
 		log.Print("Failed to do unmarshal data")
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"body": dates})
@@ -69,6 +71,7 @@ func AddNewDate(c *gin.Context) {
 	
 	if err := c.ShouldBindJSON(&dateToAdd); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
+		return
 	}
 
 	_, err := dynamo.PutItem(context.TODO(), &dynamodb.PutItemInput{
@@ -82,6 +85,7 @@ func AddNewDate(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add new date"})
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"body": "Date added"})
@@ -94,6 +98,7 @@ func RemoveDate(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&dateToRemove); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
+		return
 	}
 
 	_, err := dynamo.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
@@ -105,6 +110,7 @@ func RemoveDate(c *gin.Context) {
 	if err != nil {
 		log.Println("Failed to delete item: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to remove date"})
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"body": "Date removed"})
