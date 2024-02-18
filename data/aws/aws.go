@@ -28,7 +28,7 @@ type Date struct {
 
 func configureAWS() (*dynamodb.Client) {
 	envs, err := godotenv.Read(".env")
-
+	log.Print("ENVS:::", envs)
 	if err != nil {
 			log.Fatal("Error loading .env file")
 	}
@@ -39,6 +39,7 @@ func configureAWS() (*dynamodb.Client) {
 	}
 
 	dynamo := dynamodb.NewFromConfig(cfg)
+	log.Print("DYNAMO:::", dynamo)
 	return dynamo
 }
 
@@ -48,6 +49,7 @@ func GetAllDates(c *gin.Context) {
 	resp, err := dynamo.Scan(context.TODO(), &dynamodb.ScanInput{
 		TableName: aws.String("dates"),
 	})
+	log.Print("RESPONSE:::", resp)
 	if err != nil {
 		log.Println("Failed to scan: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Something went wrong"})

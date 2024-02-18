@@ -19,6 +19,7 @@ type Date struct {
 
 
 func GetAllDates(c *gin.Context, mongo *mongo.Client) {
+	log.Print("MONGO:::", mongo)
 	dates, err := mongo.Database("dateCalculator").Collection("dates").Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		log.Print("Failed to find all dates")
