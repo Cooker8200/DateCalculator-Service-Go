@@ -28,7 +28,7 @@ type Date struct {
 
 func configureAWS() *dynamodb.Client {
 	envs, err := godotenv.Read(".env")
-	log.Print("ENVS:::", envs)
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -43,23 +43,22 @@ func configureAWS() *dynamodb.Client {
 	}
 
 	dynamo := dynamodb.NewFromConfig(cfg)
-	log.Print("DYNAMO:::", dynamo)
 	return dynamo
 }
 
 func GetAllDates(c *gin.Context) {
 	dynamo := configureAWS()
-	log.Print("GETTING DATA")
+
 	resp, err := dynamo.Scan(context.TODO(), &dynamodb.ScanInput{
 		TableName: aws.String("dates"),
 	})
-	log.Print("RESPONSE:::", resp)
 	if err != nil {
 		log.Println("Failed to scan: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Something went wrong"})
+		errMessage := "Failed to scan dates ::: " + err.Error()
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": errMessage})
 		return
 	}
-	log.Print("UNMARSHALLING")
+
 	var dates []Date
 	err = attributevalue.UnmarshalListOfMaps(resp.Items, &dates)
 	if err != nil {
@@ -90,7 +89,8 @@ func AddNewDate(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println("Failed to add new date: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to add new date"})
+		errMessage := "Failed to add new date ::: " + err.Error()
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": errMessage})
 		return
 	}
 
@@ -115,7 +115,8 @@ func RemoveDate(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println("Failed to delete item: ", err)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to remove date"})
+		errMessage := "Failed to remove date ::: " + err.Error()
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": errMessage})
 		return
 	}
 
