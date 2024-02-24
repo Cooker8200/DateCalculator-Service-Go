@@ -8,16 +8,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 type TableBasics struct {
 	DynamoDbClient *dynamodb.Client
-	TableName string
+	TableName      string
 }
 
 type Date struct {
@@ -26,14 +26,18 @@ type Date struct {
 	Date string `json:"date" binding:"required"`
 }
 
-func configureAWS() (*dynamodb.Client) {
+func configureAWS() *dynamodb.Client {
 	envs, err := godotenv.Read(".env")
 	log.Print("ENVS:::", envs)
 	if err != nil {
-			log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(envs["aws_access_key_id"], envs["aws_secret_access_key"], "")))
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		config.WithRegion("us-east-1"),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(envs["aws_access_key_id"], envs["aws_secret_access_key"], "")),
+	)
 	if err != nil {
 		log.Fatalln("Unable to load SDK config: ", err)
 	}
@@ -68,9 +72,9 @@ func GetAllDates(c *gin.Context) {
 
 func AddNewDate(c *gin.Context) {
 	dynamo := configureAWS()
-	
+
 	var dateToAdd Date
-	
+
 	if err := c.ShouldBindJSON(&dateToAdd); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": "Failed to bind request body"})
 		return

@@ -8,8 +8,8 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o app .
+RUN go build -o date-calculator-service
 
 EXPOSE 3001
 
-CMD ["./app"]
+CMD ["./date-calculator-service"]
