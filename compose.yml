@@ -1,6 +1,6 @@
 version: '3'
 services:
-  my-golang-app:
+  date-service:
     build:
       context: .
       dockerfile: Dockerfile
