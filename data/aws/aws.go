@@ -21,9 +21,9 @@ type TableBasics struct {
 }
 
 type Date struct {
-	Name string `json:"name" binding:"required"`
-	Type string `json:"type" binding:"required"`
-	Date string `json:"date" binding:"required"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Date string `json:"date"`
 }
 
 func configureAWS() *dynamodb.Client {
