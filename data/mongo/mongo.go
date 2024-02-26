@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -33,7 +34,14 @@ func GetAllDates(c *gin.Context, mongo *mongo.Client) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"body": parsedDates})
+	jsonData, err := json.Marshal(dates)
+	if err != nil {
+		log.Panicln("Failed to marshall json");
+		errMessage := "Failed to marshall json ::: " + err.Error();
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"body": errMessage});
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"body": string(jsonData)})
 }
 
 func getSpecificDate(mongoClient *mongo.Client, id interface{}) []primitive.M {
